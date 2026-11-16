@@ -1,0 +1,12 @@
+name = "daily-puzzle"
+main = "src/index.js"
+compatibility_date = "2026-11-13"
+
+routes = [
+  { pattern = "puzzle.5888688.xyz", custom_domain = true }
+]
+
+[assets]
+directory = "./dist"
+binding = "ASSETS"
+run_worker_first = true

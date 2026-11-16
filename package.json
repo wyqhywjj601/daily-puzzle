@@ -1,0 +1,14 @@
+{
+  "name": "daily-puzzle",
+  "version": "1.0.0",
+  "private": true,
+  "description": "每日拼图 · Daily Calendar Puzzle",
+  "scripts": {
+    "build": "rm -rf dist && mkdir -p dist && cp index.html styles.css game.js _headers dist/",
+    "preview": "npm run build && wrangler dev",
+    "deploy": "npm run build && wrangler deploy"
+  },
+  "devDependencies": {
+    "wrangler": "^4.161.0"
+  }
+}

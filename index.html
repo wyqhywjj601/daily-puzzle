@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#e9e1d4">
+<meta name="description" content="每日拼图：用十块木片盖住棋盘，只留下今天的月份、日期和星期。">
+<title>每日拼图 · Daily Calendar Puzzle</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 44 44'%3E%3Crect x='1.5' y='1.5' width='19' height='19' rx='5.5' fill='%23eed7b1'/%3E%3Crect x='23.5' y='1.5' width='19' height='19' rx='5.5' fill='%23d5aa76'/%3E%3Crect x='1.5' y='23.5' width='19' height='19' rx='5.5' fill='%23b98558'/%3E%3Crect x='23.5' y='23.5' width='19' height='19' rx='5.5' fill='%23e7cda3'/%3E%3C/svg%3E">
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+<div class="app">
+  <header class="topbar">
+    <div class="brand">
+      <span class="brand-mark" aria-hidden="true">
+        <svg viewBox="0 0 44 44">
+          <rect x="1.5" y="1.5" width="19" height="19" rx="5.5" fill="#eed7b1"/>
+          <rect x="23.5" y="1.5" width="19" height="19" rx="5.5" fill="#d5aa76"/>
+          <rect x="1.5" y="23.5" width="19" height="19" rx="5.5" fill="#b98558"/>
+          <rect x="23.5" y="23.5" width="19" height="19" rx="5.5" fill="#e7cda3"/>
+          <circle cx="33" cy="33" r="4.2" fill="#f7ecd8"/>
+        </svg>
+      </span>
+      <span class="brand-copy">
+        <span class="brand-title">每日拼图</span>
+        <span class="brand-sub">DAILY CALENDAR PUZZLE</span>
+      </span>
+    </div>
+
+    <div class="date-nav" id="dateNav">
+      <button class="icon-btn nav-arrow" id="prevDay" type="button" aria-label="前一天" title="前一天">
+        <svg viewBox="0 0 20 20" aria-hidden="true"><path d="M12.5 4.5 7 10l5.5 5.5"/></svg>
+      </button>
+      <button class="date-card" id="dateCard" type="button" aria-haspopup="dialog" aria-expanded="false" title="选择日期">
+        <span class="date-main" id="dateMain">11月13日</span>
+        <span class="date-sub">
+          <span id="dateYear">2026</span><span class="date-sep">·</span><span id="dateWeekday">星期五</span>
+          <span class="today-badge" id="todayBadge" hidden>今天</span>
+          <span class="done-badge" id="doneBadge" hidden>已完成</span>
+        </span>
+      </button>
+      <button class="icon-btn nav-arrow" id="nextDay" type="button" aria-label="后一天" title="后一天">
+        <svg viewBox="0 0 20 20" aria-hidden="true"><path d="M7.5 4.5 13 10l-5.5 5.5"/></svg>
+      </button>
+
+      <div class="date-popover" id="datePopover" hidden role="dialog" aria-label="选择日期">
+        <label class="popover-label" for="dateInput">跳转到某一天</label>
+        <input class="date-input" type="date" id="dateInput">
+        <div class="popover-actions">
+          <button class="btn btn-quiet" id="todayBtn" type="button">回到今天</button>
+          <button class="btn btn-primary" id="jumpDateBtn" type="button">前往</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="top-actions">
+      <div class="timer-pill" title="用时">
+        <svg viewBox="0 0 20 20" aria-hidden="true" class="timer-icon">
+          <circle cx="10" cy="11" r="6.3"/><path d="M10 7.7v3.6l2.1 1.3M8 2.4h4M10 2.4v2"/>
+        </svg>
+        <span id="timerText">00:00</span>
+      </div>
+      <button class="btn hint-btn" id="hintBtn" type="button">
+        <svg viewBox="0 0 20 20" aria-hidden="true">
+          <path d="M10 2.5a5.6 5.6 0 0 0-3.2 10.2c.7.5 1 1 1.1 1.8h4.2c.1-.8.4-1.4 1.1-1.8A5.6 5.6 0 0 0 10 2.5Z"/>
+          <path d="M8.1 16.3h3.8M9 18h2"/>
+        </svg>
+        <span>提示</span>
+      </button>
+      <button class="icon-btn" id="resetBtn" type="button" aria-label="重新开始" title="重新开始">
+        <svg viewBox="0 0 20 20" aria-hidden="true">
+          <path d="M4.2 7.2A6.4 6.4 0 1 1 3.8 12"/><path d="M4.5 3.4v4h4"/>
+        </svg>
+      </button>
+      <button class="icon-btn" id="helpBtn" type="button" aria-label="玩法说明" title="玩法说明">
+        <svg viewBox="0 0 20 20" aria-hidden="true">
+          <circle cx="10" cy="10" r="7.2"/><path d="M7.9 7.6a2.2 2.2 0 1 1 2.8 2.1c-.6.2-.8.6-.8 1.2v.4"/><circle cx="10" cy="14.3" r=".8" fill="currentColor" stroke="none"/>
+        </svg>
+      </button>
+      <button class="icon-btn" id="soundBtn" type="button" aria-label="关闭音效" title="关闭音效">
+        <svg viewBox="0 0 20 20" aria-hidden="true" id="soundOnIcon">
+          <path d="M3.5 8h3L10 4.8v10.4L6.5 12h-3Z"/><path d="M12.6 7.2a4 4 0 0 1 0 5.6M14.7 5a7 7 0 0 1 0 10"/>
+        </svg>
+        <svg viewBox="0 0 20 20" aria-hidden="true" id="soundOffIcon" hidden>
+          <path d="M3.5 8h3L10 4.8v10.4L6.5 12h-3Z"/><path d="m12.8 8 4 4m0-4-4 4"/>
+        </svg>
+      </button>
+    </div>
+  </header>
+
+  <main class="stage">
+    <section class="board-card" aria-label="每日拼图棋盘">
+      <div class="board-heading">
+        <h1 class="board-title">每 日 拼 图</h1>
+        <p class="board-sub">留下今天 · 填满其余</p>
+      </div>
+
+      <div class="board-frame" id="boardFrame">
+        <div class="board-grid" id="boardGrid" aria-label="日期棋盘"></div>
+        <div class="preview-layer" id="previewLayer" aria-hidden="true"></div>
+        <div class="piece-layer" id="pieceLayer"></div>
+      </div>
+
+      <div class="board-meta">
+        <span id="progressText">已放置 0 / 10</span>
+        <span class="meta-dot" aria-hidden="true"></span>
+        <span class="meta-hint">拖动木片 · 覆盖其余格子</span>
+      </div>
+    </section>
+
+    <aside class="tray-card" aria-label="木片盒">
+      <div class="tray-head">
+        <div>
+          <h2 class="tray-title">木片盒</h2>
+          <p class="tray-sub">十块木片，刚好填满留白之外</p>
+        </div>
+        <div class="tray-count" aria-live="polite"><strong id="placedCount">0</strong><span>/ 10</span></div>
+      </div>
+
+      <div class="goal-row" id="goalRow">
+        <span class="goal-label">今日留空</span>
+        <span class="goal-chip" data-hole="month">11月</span>
+        <span class="goal-chip" data-hole="day">13日</span>
+        <span class="goal-chip" data-hole="weekday">星期五</span>
+      </div>
+
+      <div class="tray" id="tray" aria-label="木片"></div>
+
+      <div class="piece-tools" id="pieceTools">
+        <span class="selection-label" id="selectionLabel">点选一块木片</span>
+        <div class="piece-tool-actions">
+          <button class="tool-btn" id="rotateBtn" type="button" disabled title="旋转所选木片 (R)">
+            <svg viewBox="0 0 20 20" aria-hidden="true"><path d="M15.6 7.2A6.3 6.3 0 1 0 16.1 12"/><path d="M16 3.3v4.2h-4.2"/></svg>
+            <span>旋转</span>
+          </button>
+          <button class="tool-btn" id="flipBtn" type="button" disabled title="翻转所选木片 (F)">
+            <svg viewBox="0 0 20 20" aria-hidden="true"><path d="M10 3v14M6.8 6.2 3.4 10l3.4 3.8M13.2 6.2l3.4 3.8-3.4 3.8"/></svg>
+            <span>翻转</span>
+          </button>
+        </div>
+      </div>
+
+      <p class="tray-foot">
+        <span class="keycap">R</span> 旋转
+        <span class="keycap">F</span> 翻转
+        <span class="keycap">↑↓←→</span> 平移
+        <span class="foot-divider">·</span>
+        双击木片也可旋转
+      </p>
+    </aside>
+  </main>
+
+  <footer class="footer">
+    <span>每天一局，留下今天。</span>
+    <button class="text-btn" id="howBtn" type="button">玩法说明</button>
+  </footer>
+</div>
+
+<div class="modal-backdrop" id="helpModal" hidden>
+  <div class="modal help-modal" role="dialog" aria-modal="true" aria-labelledby="helpTitle">
+    <button class="modal-close" id="helpClose" type="button" aria-label="关闭">×</button>
+    <div class="modal-eyebrow">HOW TO PLAY</div>
+    <h2 class="modal-title" id="helpTitle">只留下今天</h2>
+    <p class="modal-lede">把十块木片全部放进棋盘，只露出当天的<strong>月份、日期和星期</strong>三个格子。</p>
+    <ol class="help-list">
+      <li><span class="help-num">1</span><span>把木片从右侧木片盒拖到棋盘上，木片会自动吸附格子。</span></li>
+      <li><span class="help-num">2</span><span>木片可旋转、可翻转。<kbd>R</kbd> 旋转，<kbd>F</kbd> 翻转，双击木片也可以旋转。选中棋盘上的木片后，可用方向键 <kbd>↑</kbd><kbd>↓</kbd><kbd>←</kbd><kbd>→</kbd> 逐格平移。</span></li>
+      <li><span class="help-num">3</span><span>把棋盘上的木片拖出棋盘，即可收回木片盒，重新摆放。</span></li>
+      <li><span class="help-num">4</span><span>卡住时点「提示」，会帮你放好一块；也可以切换日期挑战别的日子。</span></li>
+    </ol>
+    <div class="help-targets">
+      <span>今日目标</span>
+      <strong id="helpTargetText">11月 · 13日 · 星期五</strong>
+    </div>
+    <button class="btn btn-primary modal-primary" id="helpStart" type="button">开始拼图</button>
+  </div>
+</div>
+
+<div class="modal-backdrop win-backdrop" id="winModal" hidden>
+  <div class="modal win-modal" role="dialog" aria-modal="true" aria-labelledby="winTitle">
+    <div class="win-seal" aria-hidden="true">
+      <svg viewBox="0 0 64 64">
+        <circle cx="32" cy="32" r="29" fill="none" stroke="currentColor" stroke-width="1.3" stroke-dasharray="2.5 4"/>
+        <circle cx="32" cy="32" r="22.5" fill="none" stroke="currentColor" stroke-width="1"/>
+        <path d="M20.5 33.2l7.4 7.3 15-16" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/>
+      </svg>
+    </div>
+    <div class="modal-eyebrow">TODAY IS COMPLETE</div>
+    <h2 class="modal-title" id="winTitle">拼好了</h2>
+    <p class="win-date" id="winDate">2026年11月13日 · 星期五</p>
+    <p class="win-target" id="winTarget">你留下了 11月 · 13日 · 星期五</p>
+    <div class="win-stats">
+      <div><span>用时</span><strong id="winTime">00:00</strong></div>
+      <div><span>提示</span><strong id="winHints">0 次</strong></div>
+      <div><span>最佳</span><strong id="winBest">—</strong></div>
+    </div>
+    <p class="win-streak" id="winStreak" hidden></p>
+    <div class="win-actions">
+      <button class="btn btn-primary" id="playAgainBtn" type="button">再拼一次</button>
+      <button class="btn btn-quiet" id="admireBtn" type="button">看看棋盘</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
+<canvas id="confetti" aria-hidden="true"></canvas>
+<svg class="svg-defs" aria-hidden="true"><defs id="pieceDefs"></defs></svg>
+
+<noscript><p class="noscript">这个拼图需要启用 JavaScript 才能游玩。</p></noscript>
+<script src="game.js" defer></script>
+</body>
+</html>
