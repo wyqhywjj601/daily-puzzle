@@ -4,7 +4,8 @@
   "private": true,
   "description": "每日拼图 · Daily Calendar Puzzle",
   "scripts": {
-    "build": "rm -rf dist && mkdir -p dist && cp index.html styles.css game.js _headers dist/",
+    "dev": "node dev-server.mjs",
+    "build": "rm -rf dist && mkdir -p dist && cp index.html styles.css game.js drama.js _headers dist/ && cp -R vendor dist/",
     "preview": "npm run build && wrangler dev",
     "deploy": "npm run build && wrangler deploy"
   },

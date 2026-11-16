@@ -26,6 +26,41 @@ python3 -m http.server 4173
 - 日期左右箭头切换前一天 / 后一天；点击日期卡片可以直接跳转到任意日期。
 - 每个日期的进度、用时和提示次数会自动保存在浏览器本地。
 
+## 短剧
+
+顶栏的视频图标会打开短剧弹窗，顶部两个标签页：
+
+- **摸鱼短剧**：来自本机 DSH 插件 `dsh-hongguo`（openhongguo / 红果），仅本地可用
+- **HG短剧**：来自 `huangguoai.com`，本地与线上都可用
+
+点击列表里的剧集直接播放；播放页可选集、自动连播下一集。
+
+接口统一走同源 `/api/hongguo`：
+
+```
+摸鱼（仅本地 DSH）： /feed  /series  /play  /media
+HG（Worker 内实现）： /hg/feed  /hg/search  /hg/series  /hg/play
+代理：                /cover?u=  /stream?u=
+```
+
+`/stream` 会跟随 HG 的主播放列表、把分片与 AES-128 密钥地址重写成同源路径，并透传 Range；`/cover` 支持直出图片和 HG 的 AES-CBC 加密封面。
+
+本地启动（需要 DSH 桌面端已运行、插件已启用，摸鱼源的解密需要 `ffmpeg`）：
+
+```bash
+npm run dev
+# http://127.0.0.1:4173
+# 静态文件 + /api/hongguo 反代到本机 DSH（自动探测监听端口）
+```
+
+DSH 端口探测不到或想指定别处时：
+
+```bash
+DRAMA_ORIGIN=http://127.0.0.1:PORT npm run dev
+```
+
+线上由 Worker 直接请求 `huangguoai.com` 与视频 CDN，不依赖本机服务；摸鱼源在线上会提示不可用并自动切到 HG。若后续想把摸鱼也搬上公网，可给 Worker 配置 `DRAMA_ORIGIN`（本地 DSH + Cloudflare Tunnel 或自建 Node 服务），其余 `/api/hongguo/*` 会转发过去。
+
 ## 部署
 
 线上地址：**https://puzzle.5888688.xyz**
@@ -44,13 +79,17 @@ npm run preview         # 本地 Workers 环境预览
 
 ```
 daily-puzzle/
-├── index.html      # 页面结构
-├── styles.css      # 视觉样式、响应式布局与动效
-├── game.js         # 棋盘/木片模型、拖拽、求解器、存档、音效
-├── src/index.js    # Worker 入口：HTTP → HTTPS 跳转
-├── wrangler.toml   # Cloudflare 部署配置与自定义域名
-├── _headers        # 缓存与安全响应头
-├── package.json    # build / preview / deploy 脚本
+├── index.html       # 页面结构
+├── styles.css       # 视觉样式、响应式布局与动效
+├── game.js          # 棋盘/木片模型、拖拽、求解器、存档、音效
+├── drama.js         # 短剧弹窗：列表、标签页、播放器
+├── dev-server.mjs   # 本地静态服务 + /api/hongguo 反代
+├── vendor/          # hls.js（HG 的 AES-128 HLS 播放）
+├── src/index.js     # Worker 入口：HTTPS 跳转 + 路由
+├── src/hg.js        # HG 短剧接口、HLS/封面代理
+├── wrangler.toml    # Cloudflare 部署配置与自定义域名
+├── _headers         # 缓存与安全响应头
+├── package.json     # dev / build / preview / deploy 脚本
 └── README.md
 ```
 

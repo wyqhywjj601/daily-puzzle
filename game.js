@@ -1833,6 +1833,7 @@
     window.addEventListener('keydown', (e) => {
       const tag = e.target && e.target.tagName;
       if (tag === 'INPUT' || tag === 'TEXTAREA' || (e.target && e.target.isContentEditable)) return;
+      if (document.body.classList.contains('drama-open')) return;
 
       if (e.key === 'Escape') {
         if (drag) {

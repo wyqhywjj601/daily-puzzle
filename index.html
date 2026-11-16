@@ -86,6 +86,12 @@
           <path d="M3.5 8h3L10 4.8v10.4L6.5 12h-3Z"/><path d="m12.8 8 4 4m0-4-4 4"/>
         </svg>
       </button>
+      <button class="icon-btn" id="dramaBtn" type="button" aria-label="短剧" title="摸个鱼 · 看短剧">
+        <svg viewBox="0 0 20 20" aria-hidden="true">
+          <rect x="2.4" y="4.4" width="15.2" height="11.2" rx="2.4"/>
+          <path d="M8.5 7.7 12.4 10l-3.9 2.3Z"/>
+        </svg>
+      </button>
     </div>
   </header>
 
@@ -203,11 +209,59 @@
   </div>
 </div>
 
+<div class="modal-backdrop drama-backdrop" id="dramaModal" hidden>
+  <div class="modal drama-modal" role="dialog" aria-modal="true" aria-labelledby="dramaTitle" tabindex="-1">
+    <div class="drama-head">
+      <div class="drama-heading">
+        <div class="modal-eyebrow">SHORT DRAMA</div>
+        <h2 class="modal-title drama-title" id="dramaTitle">摸个鱼，看一集</h2>
+      </div>
+      <button class="modal-close" id="dramaClose" type="button" aria-label="关闭">×</button>
+    </div>
+
+    <div class="drama-tabs" role="tablist" aria-label="短剧来源">
+      <button class="drama-tab is-active" type="button" role="tab" aria-selected="true" aria-controls="dramaBody" data-source="moyu">摸鱼短剧</button>
+      <button class="drama-tab" type="button" role="tab" aria-selected="false" aria-controls="dramaBody" data-source="hg">HG短剧</button>
+      <span class="drama-tabs-spacer" aria-hidden="true"></span>
+      <button class="drama-refresh" id="dramaRefresh" type="button">换一批</button>
+    </div>
+
+    <div class="drama-body" id="dramaBody">
+      <div class="drama-list-wrap" id="dramaListWrap">
+        <div class="drama-grid" id="dramaGrid"></div>
+        <p class="drama-empty" id="dramaEmpty" hidden></p>
+      </div>
+
+      <div class="drama-player" id="dramaPlayer" hidden>
+        <div class="drama-stage">
+          <video id="dramaVideo" playsinline controls preload="metadata"></video>
+          <div class="drama-stage-mask" id="dramaStageMask">
+            <span class="drama-spinner" aria-hidden="true"></span>
+            <span id="dramaStageText">正在准备播放…</span>
+          </div>
+        </div>
+        <div class="drama-meta">
+          <button class="drama-back" id="dramaBack" type="button">← 返回列表</button>
+          <div class="drama-now">
+            <strong id="dramaNowTitle">—</strong>
+            <span id="dramaNowSub"></span>
+          </div>
+          <label class="drama-ep">
+            <span>选集</span>
+            <select id="dramaEpisodeSelect"></select>
+          </label>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
 <div class="toast" id="toast" role="status" aria-live="polite"></div>
 <canvas id="confetti" aria-hidden="true"></canvas>
 <svg class="svg-defs" aria-hidden="true"><defs id="pieceDefs"></defs></svg>
 
 <noscript><p class="noscript">这个拼图需要启用 JavaScript 才能游玩。</p></noscript>
 <script src="game.js" defer></script>
+<script src="drama.js" defer></script>
 </body>
 </html>

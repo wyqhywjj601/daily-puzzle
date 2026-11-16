@@ -1270,3 +1270,355 @@ body.is-dragging * { cursor: grabbing !important; }
     scroll-behavior: auto !important;
   }
 }
+
+/* =========================================================
+   短剧弹窗
+   ========================================================= */
+
+body.drama-open { overflow: hidden; }
+
+.drama-backdrop { z-index: 140; }
+
+.drama-modal {
+  width: min(1060px, 100%);
+  height: min(88dvh, 940px);
+  max-height: calc(100dvh - 40px);
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  border-radius: 30px;
+}
+
+.drama-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 18px;
+  padding: 24px 28px 0;
+}
+.drama-heading { min-width: 0; }
+.drama-title {
+  font-size: clamp(23px, 3vw, 31px);
+  letter-spacing: .05em;
+}
+.drama-head .modal-close {
+  position: static;
+  flex: 0 0 auto;
+}
+
+.drama-tabs {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 18px 28px 0;
+  border-bottom: 1px solid rgba(92, 60, 31, .12);
+  padding-bottom: 12px;
+}
+.drama-tab {
+  height: 34px;
+  padding: 0 17px;
+  border-radius: 999px;
+  border: 1px solid transparent;
+  background: transparent;
+  color: #7c654c;
+  font-family: var(--sans);
+  font-size: 12.5px;
+  font-weight: 600;
+  letter-spacing: .04em;
+  cursor: pointer;
+  transition: background .18s ease, color .18s ease, border-color .18s ease;
+}
+.drama-tab:hover { color: #4a3320; background: rgba(255, 251, 242, .6); }
+.drama-tab.is-active {
+  color: #3b2716;
+  background: #fffaf1;
+  border-color: rgba(160, 112, 52, .28);
+  box-shadow: 0 1px 0 rgba(255, 255, 255, .9) inset, 0 6px 14px -10px rgba(78, 48, 20, .5);
+}
+.drama-tabs-spacer { flex: 1; }
+.drama-refresh {
+  height: 32px;
+  padding: 0 13px;
+  border-radius: 999px;
+  border: 1px solid rgba(120, 84, 46, .2);
+  background: rgba(255, 252, 245, .65);
+  color: #6b5238;
+  font-family: var(--sans);
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: .05em;
+  cursor: pointer;
+}
+.drama-refresh:hover { background: #fffdf8; color: #412c18; }
+.drama-refresh:disabled { opacity: .5; cursor: default; }
+
+.drama-body {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  padding: 20px 28px 26px;
+  overscroll-behavior: contain;
+}
+
+.drama-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(146px, 1fr));
+  gap: 18px 16px;
+}
+
+.drama-card {
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+  min-width: 0;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  text-align: left;
+  cursor: pointer;
+  font-family: var(--sans);
+}
+.drama-cover {
+  position: relative;
+  display: block;
+  width: 100%;
+  aspect-ratio: 2 / 3;
+  border-radius: 14px;
+  overflow: hidden;
+  background:
+    linear-gradient(150deg, rgba(255, 250, 240, .95), rgba(226, 205, 172, .95));
+  box-shadow: 0 1px 0 rgba(255, 255, 255, .7) inset, 0 14px 26px -20px rgba(52, 31, 14, .8);
+  transition: transform .18s ease, box-shadow .18s ease;
+}
+.drama-card:hover .drama-cover {
+  transform: translateY(-2px);
+  box-shadow: 0 1px 0 rgba(255, 255, 255, .8) inset, 0 20px 30px -20px rgba(52, 31, 14, .85);
+}
+.drama-cover img {
+  position: relative;
+  z-index: 1;
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+.drama-cover-fallback {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  color: rgba(120, 90, 55, .55);
+  font-family: var(--serif);
+  font-size: 12px;
+  letter-spacing: .3em;
+  text-indent: .3em;
+}
+.drama-card-title {
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  min-height: 2.7em;
+  color: #3c2a19;
+  font-size: 12.5px;
+  font-weight: 600;
+  line-height: 1.35;
+}
+.drama-card-meta {
+  overflow: hidden;
+  color: #8d775f;
+  font-size: 10px;
+  line-height: 1.4;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+.drama-card.is-skeleton { cursor: default; }
+.drama-card.is-skeleton .drama-cover,
+.drama-card.is-skeleton .drama-card-line {
+  background: linear-gradient(100deg, #e9ddc9 28%, #f7eddd 50%, #e9ddc9 72%);
+  background-size: 220% 100%;
+  animation: dramaShimmer 1.25s ease-in-out infinite;
+}
+.drama-card.is-skeleton .drama-card-line {
+  display: block;
+  height: 10px;
+  border-radius: 5px;
+}
+.drama-card.is-skeleton .drama-card-line.is-short { width: 58%; }
+@keyframes dramaShimmer {
+  0% { background-position: 130% 0; }
+  100% { background-position: -30% 0; }
+}
+
+.drama-empty {
+  margin: 44px 0;
+  text-align: center;
+  color: #8a7258;
+  font-size: 12px;
+  line-height: 1.8;
+}
+
+/* 播放器 */
+.drama-player {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+.drama-stage {
+  position: relative;
+  height: min(56dvh, 540px);
+  border-radius: 18px;
+  overflow: hidden;
+  background: #0c0906;
+  box-shadow: 0 1px 0 rgba(255, 255, 255, .1) inset;
+}
+.drama-stage video {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  background: #0c0906;
+}
+.drama-stage-mask {
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 11px;
+  padding: 0 24px;
+  background: rgba(16, 10, 5, .62);
+  color: #f3e5ce;
+  font-family: var(--sans);
+  font-size: 12px;
+  line-height: 1.7;
+  text-align: center;
+  backdrop-filter: blur(2px);
+}
+.drama-stage-mask.is-error { color: #ffc9a3; background: rgba(28, 12, 6, .78); }
+.drama-spinner {
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  border: 2px solid rgba(255, 255, 255, .22);
+  border-top-color: #f0c97c;
+  animation: dramaSpin .8s linear infinite;
+}
+.drama-stage-mask.is-error .drama-spinner { display: none; }
+@keyframes dramaSpin { to { transform: rotate(360deg); } }
+
+.drama-meta {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 0 2px;
+}
+.drama-back {
+  flex: 0 0 auto;
+  height: 32px;
+  padding: 0 13px;
+  border-radius: 999px;
+  border: 1px solid rgba(120, 84, 46, .2);
+  background: rgba(255, 252, 245, .7);
+  color: #6b5238;
+  font-family: var(--sans);
+  font-size: 11px;
+  font-weight: 600;
+  cursor: pointer;
+}
+.drama-back:hover { background: #fffdf8; color: #412c18; }
+.drama-now {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+.drama-now strong {
+  overflow: hidden;
+  color: #3a2718;
+  font-size: 14px;
+  font-weight: 600;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+.drama-now span { color: #8b745c; font-size: 10.5px; }
+.drama-ep {
+  flex: 0 0 auto;
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  color: #7d6650;
+  font-size: 10.5px;
+}
+.drama-ep select {
+  height: 32px;
+  min-width: 108px;
+  max-width: 168px;
+  padding: 0 8px;
+  border-radius: 10px;
+  border: 1px solid rgba(120, 84, 46, .22);
+  background: #fffaf1;
+  color: #4a3320;
+  font-family: var(--sans);
+  font-size: 11px;
+  cursor: pointer;
+}
+
+@media (max-width: 840px) {
+  .drama-modal { height: min(92dvh, 940px); border-radius: 24px; }
+  .drama-head { padding: 20px 20px 0; }
+  .drama-tabs { padding: 14px 20px 10px; }
+  .drama-body { padding: 16px 20px 20px; }
+  .drama-grid { grid-template-columns: repeat(auto-fill, minmax(124px, 1fr)); gap: 15px 12px; }
+  .drama-stage { height: min(48dvh, 460px); }
+}
+
+@media (max-width: 620px) {
+  .drama-backdrop { padding: 10px; }
+  .drama-modal { height: calc(100dvh - 20px); max-height: none; border-radius: 20px; }
+  .drama-head { padding: 16px 16px 0; }
+  .drama-title { font-size: 20px; }
+  .drama-tabs { padding: 12px 16px 9px; }
+  .drama-tab { height: 30px; padding: 0 13px; font-size: 11.5px; }
+  .drama-refresh { height: 29px; padding: 0 10px; font-size: 10.5px; }
+  .drama-body { padding: 14px 16px 16px; }
+  .drama-grid { grid-template-columns: repeat(auto-fill, minmax(102px, 1fr)); gap: 13px 10px; }
+  .drama-card-title { font-size: 11.5px; }
+  .drama-card-meta { font-size: 9.5px; }
+  .drama-stage { height: min(42dvh, 380px); border-radius: 14px; }
+  .drama-meta { flex-wrap: wrap; gap: 9px; }
+  .drama-now { order: 3; flex-basis: 100%; }
+  .drama-ep { margin-left: auto; }
+  .drama-back { height: 30px; padding: 0 11px; font-size: 10.5px; }
+  .drama-ep select { height: 30px; max-width: 140px; }
+}
+
+.drama-modal.is-playing { width: min(820px, 100%); }
+.drama-player { width: 100%; max-width: 660px; margin: 0 auto; }
+.drama-stage { margin: 0 auto; }
+@media (max-width: 840px) {
+  .drama-modal.is-playing { width: 100%; }
+}
+
+@media (max-width: 430px) {
+  .timer-pill { display: none; }
+  .topbar { padding-left: 14px; padding-right: 14px; }
+  .top-actions { gap: 0; }
+  .top-actions .icon-btn { width: 32px; height: 32px; }
+  .hint-btn { padding: 0 9px; }
+}
+
+@media (max-width: 360px) {
+  #helpBtn { display: none; }
+  .brand-mark { width: 32px; height: 32px; }
+  .brand { gap: 7px; }
+  .brand-title { font-size: 17px; }
+  .top-actions .icon-btn { width: 30px; height: 30px; }
+}
+
+.drama-modal:focus { outline: none; }

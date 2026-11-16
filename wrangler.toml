@@ -10,3 +10,7 @@ routes = [
 directory = "./dist"
 binding = "ASSETS"
 run_worker_first = true
+
+# 短剧后端（本地 DSH + Tunnel，或自建服务）
+# [vars]
+# DRAMA_ORIGIN = "https://drama-api.example.com"
