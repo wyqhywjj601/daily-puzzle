@@ -948,7 +948,7 @@
     if (!piece) {
       selectionLabel.textContent = '点选一块木片';
     } else {
-      selectionLabel.innerHTML = `<strong>木片 ${piece.id + 1}</strong> · ${piece.shape.length} 格${piece.anchor ? ' · 已入盘' : ' · 在木片盒'}`;
+      selectionLabel.innerHTML = `<strong>木片 ${piece.id + 1}</strong> · ${piece.shape.length} 格${piece.anchor ? ' · 已入盘' : ' · 点棋盘格子放置'}`;
     }
 
     tray.querySelectorAll('.piece-slot').forEach((slot) => {
@@ -1427,6 +1427,40 @@
     return true;
   }
 
+  /**
+   * 触屏放置：先点木片盒里的木片，再点棋盘格子。
+   * 以点击格为中心，就近找一个能放下的锚点。
+   */
+  function placeSelectedAtCell(cellKey) {
+    if (modalOpen || state.completed || selectedPieceId === null) return false;
+    const cell = cellByKey.get(cellKey);
+    const piece = state.pieces[selectedPieceId];
+    if (!cell || !piece || piece.anchor) return false;
+
+    const { w, h } = bboxOf(piece.shape);
+    const baseC = Math.round(cell.c - (w - 1) / 2);
+    const baseR = Math.round(cell.r - (h - 1) / 2);
+    const offsets = [];
+    for (let dr = -2; dr <= 2; dr += 1) {
+      for (let dc = -2; dc <= 2; dc += 1) offsets.push([dc, dr]);
+    }
+    offsets.sort((a, b) => a[0] * a[0] + a[1] * a[1] - (b[0] * b[0] + b[1] * b[1]));
+
+    for (const [dc, dr] of offsets) {
+      const c = clamp(baseC + dc, 0, COLS - w);
+      const r = clamp(baseR + dr, 0, ROWS - h);
+      if (!canPlace(piece.shape, c, r, piece.id)) continue;
+      startTimer();
+      commitPlacement(piece.id, piece.shape, { c, r });
+      playSound('snap');
+      return true;
+    }
+
+    playSound('invalid');
+    showToast('这个位置放不下，换个格子试试', { error: true });
+    return false;
+  }
+
   /* =========================================================
      Drag interaction
      ========================================================= */
@@ -1727,6 +1761,12 @@
   function bindEvents() {
     boardGrid.addEventListener('pointerdown', (e) => {
       if (e.target.closest('.board-piece')) return;
+      const cellEl = e.target.closest('.cell[data-cell]');
+      const piece = selectedPieceId === null ? null : state.pieces[selectedPieceId];
+      // 选中木片盒里的木片后，点棋盘格子直接放置（手机上没有跨屏拖拽）。
+      if (cellEl && piece && !piece.anchor && !state.completed) {
+        if (placeSelectedAtCell(cellEl.dataset.cell)) return;
+      }
       if (selectedPieceId !== null) {
         selectedPieceId = null;
         updateSelectionUI();
@@ -1935,7 +1975,11 @@
       }
       setTimeout(() => {
         if (!state.completed && !drag) {
-          showToast(`拖动木片，只留下 ${currentDate.getMonth() + 1}月 · ${currentDate.getDate()}日 · ${WEEKDAY_NAMES[currentDate.getDay()]}`, { duration: 3400 });
+          const coarse = window.matchMedia('(pointer: coarse)').matches;
+          const message = coarse
+            ? '点木片，再点棋盘格子放置'
+            : `拖动木片，只留下 ${currentDate.getMonth() + 1}月 · ${currentDate.getDate()}日 · ${WEEKDAY_NAMES[currentDate.getDay()]}`;
+          showToast(message, { duration: 3400 });
         }
       }, 900);
     }
