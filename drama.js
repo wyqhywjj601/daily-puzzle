@@ -237,7 +237,14 @@
     if (source.kind === 'hls') {
       const Hls = await loadHlsLib();
       if (Hls.isSupported()) {
-        const hls = new Hls({ enableWorker: true });
+        const hls = new Hls({
+          enableWorker: true,
+          capLevelToPlayerSize: true,
+          maxBufferLength: 20,
+          maxMaxBufferLength: 30,
+          backBufferLength: 10,
+          maxBufferSize: 30 * 1000 * 1000,
+        });
         state.hls = hls;
         hls.loadSource(source.url);
         hls.attachMedia(video);
@@ -465,8 +472,11 @@
     }
   }, true);
 
-  // 关闭页面/切到后台时停掉声音
+  // 切到后台时停掉声音和 HLS 拉流，回来再继续
   document.addEventListener('visibilitychange', () => {
     if (document.hidden && !dramaModal.hidden) video.pause();
+    if (!state.hls) return;
+    if (document.hidden) state.hls.stopLoad();
+    else state.hls.startLoad();
   });
 })();

@@ -44,7 +44,6 @@ body {
     radial-gradient(900px 700px at 100% 5%, rgba(250, 238, 218, .6), transparent 60%),
     radial-gradient(900px 700px at 50% 110%, rgba(203, 184, 159, .55), transparent 65%),
     linear-gradient(145deg, #f0e8da 0%, #e9dfd0 48%, #e4d8c7 100%);
-  background-attachment: fixed;
   -webkit-font-smoothing: antialiased;
   text-rendering: optimizeLegibility;
 }
@@ -503,7 +502,20 @@ button:disabled { cursor: not-allowed; }
     inset 0 0 0 1.5px rgba(170, 108, 29, .62),
     inset 0 0 16px rgba(255, 207, 106, .4),
     0 0 0 1px rgba(255, 233, 174, .22);
-  animation: targetBreathe 3.4s ease-in-out infinite;
+}
+/* 呼吸光用透明度动画（合成层），不再逐帧重绘 box-shadow。 */
+.cell.is-target::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  border-radius: inherit;
+  pointer-events: none;
+  background: radial-gradient(120% 120% at 50% 45%, rgba(255, 214, 120, .5), rgba(255, 214, 120, 0) 72%);
+  box-shadow: inset 0 0 20px rgba(255, 211, 116, .45);
+  opacity: .32;
+  /* 只呼吸三轮，之后保持静态：持续动画会让整页反复合成，笔记本上很费电。 */
+  animation: targetGlow 3.4s ease-in-out 3;
 }
 .cell.is-target::after {
   content: "";
@@ -518,27 +530,25 @@ button:disabled { cursor: not-allowed; }
   box-shadow: 0 0 0 2px rgba(255, 232, 168, .35);
 }
 .board-card.is-complete .cell.is-target {
-  animation: none;
   color: #4c5f45;
   background:
     radial-gradient(80% 70% at 50% 45%, #f8efce, #e8d9a9 70%, #decf9f);
   box-shadow: inset 0 0 0 1.5px rgba(105, 130, 91, .55), inset 0 0 15px rgba(255, 245, 195, .65);
 }
 .board-card.is-complete .cell.is-target::after { background: #657d5d; }
+.board-card.is-complete .cell.is-target::before { animation: none; opacity: .18; }
 
-@keyframes targetBreathe {
-  0%, 100% {
-    box-shadow:
-      inset 0 0 0 1.5px rgba(170, 108, 29, .58),
-      inset 0 0 13px rgba(255, 207, 106, .32),
-      0 0 0 1px rgba(255, 233, 174, .15);
-  }
-  50% {
-    box-shadow:
-      inset 0 0 0 2px rgba(184, 119, 31, .8),
-      inset 0 0 22px rgba(255, 211, 116, .52),
-      0 0 0 1px rgba(255, 239, 190, .35);
-  }
+@keyframes targetGlow {
+  0%, 100% { opacity: .32; }
+  50% { opacity: 1; }
+}
+
+/* 看短剧/切到后台时停掉背景呼吸光 */
+body.drama-open .cell.is-target::before,
+body.is-paused .cell.is-target::before { animation-play-state: paused; }
+
+@media (prefers-reduced-motion: reduce) {
+  .cell.is-target::before { animation: none; opacity: .55; }
 }
 
 .motto {
@@ -713,8 +723,6 @@ body.is-dragging * { cursor: grabbing !important; }
   box-shadow:
     0 1px 0 rgba(255, 255, 255, .92) inset,
     0 30px 65px -46px rgba(65, 42, 22, .55);
-  backdrop-filter: blur(14px);
-  -webkit-backdrop-filter: blur(14px);
 }
 
 .tray-head { display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; }
@@ -950,9 +958,7 @@ body.is-dragging * { cursor: grabbing !important; }
   align-items: center;
   justify-content: center;
   padding: 20px;
-  background: rgba(37, 24, 13, .5);
-  backdrop-filter: blur(8px);
-  -webkit-backdrop-filter: blur(8px);
+  background: rgba(37, 24, 13, .48);
   opacity: 0;
   transition: opacity .22s ease;
 }
@@ -1277,7 +1283,7 @@ body.is-dragging * { cursor: grabbing !important; }
 
 body.drama-open { overflow: hidden; }
 
-.drama-backdrop { z-index: 140; }
+.drama-backdrop { z-index: 140; background: rgba(32, 20, 10, .58); }
 
 .drama-modal {
   width: min(1060px, 100%);
@@ -1497,7 +1503,6 @@ body.drama-open { overflow: hidden; }
   font-size: 12px;
   line-height: 1.7;
   text-align: center;
-  backdrop-filter: blur(2px);
 }
 .drama-stage-mask.is-error { color: #ffc9a3; background: rgba(28, 12, 6, .78); }
 .drama-spinner {
